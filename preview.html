@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ieșirea din bucla evaluării</title>
+
+<style>
+:root {
+  --bg: #f4f6f8;
+  --panel: #ffffff;
+  --text: #263238;
+  --muted: #68747c;
+  --border: #d9dee3;
+  --accent: #3f6f8f;
+  --accent-light: #e7f0f5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+}
+
+.game {
+  width: min(900px, 100%);
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-size: 28px;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+.top {
+  display: grid;
+  grid-template-columns: 1.15fr .85fr;
+  gap: 14px;
+}
+
+.label {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 8px;
+}
+
+input,
+select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  background: white;
+  color: var(--text);
+  font-size: 16px;
+}
+
+select {
+  margin-top: 4px;
+}
+
+.meters {
+  display: grid;
+  gap: 13px;
+}
+
+.meter-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 40px;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+}
+
+.bar {
+  height: 12px;
+  border-radius: 20px;
+  background: #edf0f2;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  width: 50%;
+  background: var(--accent);
+  transition: width .3s ease;
+}
+
+.fill.space {
+  opacity: .5;
+}
+
+.status {
+  background: var(--accent-light);
+  border-radius: 10px;
+  padding: 11px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.quote {
+  font-size: 21px;
+  font-weight: bold;
+  line-height: 1.35;
+  margin-top: 12px;
+}
+
+.state {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.state-box {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  background: white;
+  min-height: 90px;
+  transition: .2s;
+}
+
+.state-box.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.state-title {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+
+.state-text {
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+button {
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 13px 12px;
+  background: white;
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  min-height: 62px;
+  text-align: left;
+  transition: .15s;
+}
+
+button:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+button:active {
+  transform: scale(.98);
+}
+
+button small {
+  display: block;
+  color: var(--muted);
+  margin-top: 5px;
+  line-height: 1.25;
+}
+
+.history {
+  margin-top: 14px;
+}
+
+.path {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  min-height: 42px;
+}
+
+.node {
+  padding: 7px 9px;
+  border-radius: 8px;
+  background: #f1f3f5;
+  border: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.arrow {
+  color: var(--muted);
+}
+
+.combo {
+  margin-top: 12px;
+  padding: 11px;
+  background: var(--accent-light);
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.bottom {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.bottom button {
+  min-height: 44px;
+}
+
+@media (max-width: 700px) {
+  body {
+    padding: 14px;
+  }
+
+  .top {
+    grid-template-columns: 1fr;
+  }
+
+  .state {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 430px) {
+  .actions {
+    grid-template-columns: 1fr;
+  }
+
+  h1 {
+    font-size: 23px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+  <h1>Ieșirea din bucla evaluării</h1>
+  <div class="subtitle">
+    Experimentează diferite șiruri de intervenții și observă cum se schimbă starea sistemului.
+  </div>
+
+  <div class="top">
+
+    <section class="panel">
+
+      <div class="label">
+        Propoziția care deranjează
+      </div>
+
+      <input
+        id="sentence"
+        value="Aici scrie propoziția care deranjează?"
+        aria-label="Propoziția declanșatoare"
+      >
+
+      <div class="label" style="margin-top:15px">
+        Cine o spune?
+      </div>
+
+      <select id="speaker">
+        <option value="peer">
+          coleg / egal
+        </option>
+
+        <option value="authority" selected>
+          persoană cu autoritate
+        </option>
+
+        <option value="group">
+          grupul
+        </option>
+
+        <option value="close">
+          persoană apropiată
+        </option>
+
+        <option value="self">
+          eu însumi
+        </option>
+      </select>
+
+      <div class="quote" id="quote">
+        „Aici scrie propoziția care deranjează”
+      </div>
+
+    </section>
+
+
+    <section class="panel meters">
+
+      <div class="label">
+        Starea sistemului
+      </div>
+
+      <div class="meter-row">
+        <span>Buclă</span>
+
+        <div class="bar">
+          <div
+            id="loopFill"
+            class="fill"
+          ></div>
+        </div>
+
+        <strong id="loopValue">62</strong>
+      </div>
+
+
+      <div class="meter-row">
+        <span>Alternative</span>
+
+        <div class="bar">
+          <div
+            id="spaceFill"
+            class="fill space"
+          ></div>
+        </div>
+
+        <strong id="spaceValue">38</strong>
+      </div>
+
+
+      <div
+        id="status"
+        class="status"
+        aria-live="polite"
+      >
+        Evaluarea a intrat în sistem.
+        Acum putem testa succesiuni diferite.
+      </div>
+
+    </section>
+
+  </div>
+
+
+  <div class="state">
+
+    <div
+      id="boxSentence"
+      class="state-box active"
+    >
+      <div class="state-title">
+        1 · PROPOZIȚIE
+      </div>
+
+      <div
+        id="sentenceView"
+        class="state-text"
+      >
+        „Și tu te gruzești?”
+      </div>
+    </div>
+
+
+    <div
+      id="boxInterpret"
+      class="state-box"
+    >
+      <div class="state-title">
+        2 · INTERPRETARE
+      </div>
+
+      <div
+        id="interpret"
+        class="state-text"
+      >
+        „Asta spune ceva despre mine.”
+      </div>
+    </div>
+
+
+    <div
+      id="boxSelf"
+      class="state-box"
+    >
+      <div class="state-title">
+        3 · AUTOEVALUARE
+      </div>
+
+      <div
+        id="selfEval"
+        class="state-text"
+      >
+        „Poate chiar am o problemă.”
+      </div>
+    </div>
+
+  </div>
+
+
+  <section class="panel">
+
+    <div class="label">
+      Alege următorul pas
+    </div>
+
+    <div class="actions">
+
+      <button data-action="distance">
+        Separ propoziția de mine
+        <small>
+          „Este o evaluare, nu identitatea mea.”
+        </small>
+      </button>
+
+
+      <button data-action="context">
+        Caut contextul
+        <small>
+          „Ce anume a fost observat?”
+        </small>
+      </button>
+
+
+      <button data-action="hypothesis">
+        O transform în ipoteză
+        <small>
+          „Poate fi adevărat. Poate nu.”
+        </small>
+      </button>
+
+
+      <button data-action="perspective">
+        Caut altă perspectivă
+        <small>
+          „Cum ar vedea altcineva?”
+        </small>
+      </button>
+
+
+      <button data-action="pause">
+        Întrerup reacția
+        <small>
+          Nu răspund imediat.
+        </small>
+      </button>
+
+
+      <button data-action="action">
+        Fac ceva concret
+        <small>
+          Un pas mic, observabil.
+        </small>
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <section class="panel history">
+
+    <div class="label">
+      Șirul parcurs
+    </div>
+
+    <div
+      id="path"
+      class="path"
+    >
+      <span class="node">
+        stare inițială
+      </span>
+    </div>
+
+
+    <div
+      id="combo"
+      class="combo"
+    >
+      Încearcă 2–4 pași diferiți.
+      Uneori efectul apare din combinație,
+      nu dintr-o singură intervenție.
+    </div>
+
+
+    <div class="bottom">
+
+      <button id="reset">
+        ↻ Repornește experimentul
+      </button>
+
+      <button id="newSentence">
+        Schimbă propoziția
+      </button>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<script>
+
+(function () {
+
+  const sentence =
+    document.getElementById("sentence");
+
+  const speaker =
+    document.getElementById("speaker");
+
+  const quote =
+    document.getElementById("quote");
+
+  const loopFill =
+    document.getElementById("loopFill");
+
+  const spaceFill =
+    document.getElementById("spaceFill");
+
+  const loopValue =
+    document.getElementById("loopValue");
+
+  const spaceValue =
+    document.getElementById("spaceValue");
+
+  const status =
+    document.getElementById("status");
+
+  const sentenceView =
+    document.getElementById("sentenceView");
+
+  const interpret =
+    document.getElementById("interpret");
+
+  const selfEval =
+    document.getElementById("selfEval");
+
+  const path =
+    document.getElementById("path");
+
+  const combo =
+    document.getElementById("combo");
+
+
+  let loop = 62;
+
+  let space = 38;
+
+  let steps = [];
+
+
+  const labels = {
+
+    distance:
+      "distanțare",
+
+    context:
+      "context",
+
+    hypothesis:
+      "ipoteză",
+
+    perspective:
+      "a doua perspectivă",
+
+    pause:
+      "pauză",
+
+    action:
+      "acțiune"
+
+  };
+
+
+  function clamp(value) {
+
+    return Math.max(
+      0,
+      Math.min(
+        100,
+        Math.round(value)
+      )
+    );
+
+  }
+
+
+  function render() {
+
+    loop = clamp(loop);
+
+    space = clamp(space);
+
+
+    loopFill.style.width =
+      loop + "%";
+
+    spaceFill.style.width =
+      space + "%";
+
+
+    loopValue.textContent =
+      loop;
+
+    spaceValue.textContent =
+      space;
+
+
+    const text =
+      sentence.value.trim() ||
+      "—";
+
+
+    quote.textContent =
+      "„" + text + "”";
+
+    sentenceView.textContent =
+      "„" + text + "”";
+
+
+    if (loop > 70) {
+
+      interpret.textContent =
+        "„Evaluarea începe să pară o descriere a mea.”";
+
+      selfEval.textContent =
+        "„Dacă are dreptate?”";
+
+    }
+
+    else if (loop > 40) {
+
+      interpret.textContent =
+        "„Poate că evaluarea spune ceva important.”";
+
+      selfEval.textContent =
+        "„Trebuie să verific ce înseamnă.”";
+
+    }
+
+    else {
+
+      interpret.textContent =
+        "„Este doar o informație despre o situație.”";
+
+      selfEval.textContent =
+        "„Pot alege ce fac mai departe.”";
+
+    }
+
+
+    document
+      .querySelectorAll(".state-box")
+      .forEach(function (box) {
+
+        box.classList.remove("active");
+
+      });
+
+
+    if (loop > 70) {
+
+      document
+        .getElementById("boxSelf")
+        .classList.add("active");
+
+    }
+
+    else if (loop > 40) {
+
+      document
+        .getElementById("boxInterpret")
+        .classList.add("active");
+
+    }
+
+    else {
+
+      document
+        .getElementById("boxSentence")
+        .classList.add("active");
+
+    }
+
+
+    path.innerHTML =
+      '<span class="node">stare inițială</span>' +
+
+      steps.map(function (step) {
+
+        return (
+          '<span class="arrow">→</span>' +
+          '<span class="node">' +
+          labels[step] +
+          '</span>'
+        );
+
+      }).join("");
+
+  }
+
+
+  function action(type) {
+
+    let deltaLoop = 0;
+
+    let deltaSpace = 0;
+
+    let message = "";
+
+
+    if (type === "distance") {
+
+      deltaLoop = -12;
+
+      deltaSpace = 12;
+
+      message =
+        "Ai creat o distanță între propoziție și identitate.";
+
+    }
+
+
+    if (type === "context") {
+
+      deltaLoop = -7;
+
+      deltaSpace = 7;
+
+      message =
+        "Ai mutat atenția de la verdict la informația concretă.";
+
+    }
+
+
+    if (type === "hypothesis") {
+
+      deltaLoop = -9;
+
+      deltaSpace = 9;
+
+      message =
+        "Verdictul a devenit o ipoteză care poate fi verificată.";
+
+    }
+
+
+    if (type === "perspective") {
+
+      deltaLoop = -8;
+
+      deltaSpace = 10;
+
+      message =
+        "Ai introdus o interpretare alternativă.";
+
+    }
+
+
+    if (type === "pause") {
+
+      deltaLoop = -5;
+
+      deltaSpace = 6;
+
+      message =
+        "Ai întrerupt automatismul dintre evaluare și reacție.";
+
+    }
+
+
+    if (type === "action") {
+
+      deltaLoop = -4;
+
+      deltaSpace = 8;
+
+      message =
+        "Ai mutat energia din evaluare în comportament observabil.";
+
+    }
+
+
+    const previous =
+      steps[steps.length - 1];
+
+
+    /*
+      Aici apare ideea importantă a jocului:
+
+      anumite combinații produc un efect
+      suplimentar față de fiecare acțiune
+      luată separat.
+    */
+
+
+    const combination =
+
+      (
+        previous === "distance" &&
+        type === "context"
+      )
+
+      ||
+
+      (
+        previous === "context" &&
+        type === "hypothesis"
+      )
+
+      ||
+
+      (
+        previous === "pause" &&
+        type === "action"
+      )
+
+      ||
+
+      (
+        previous === "hypothesis" &&
+        type === "action"
+      )
+
+      ||
+
+      (
+        previous === "distance" &&
+        type === "pause"
+      )
+
+      ||
+
+      (
+        previous === "perspective" &&
+        type === "distance"
+      );
+
+
+    if (combination) {
+
+      deltaLoop -= 9;
+
+      deltaSpace += 9;
+
+
+      combo.textContent =
+        "Combinație emergentă: " +
+
+        labels[previous] +
+
+        " → " +
+
+        labels[type] +
+
+        ". " +
+
+        "Ordinea intervențiilor produce un efect suplimentar.";
+
+    }
+
+    else {
+
+      combo.textContent =
+        "Pas înregistrat. " +
+
+        "Încearcă o altă succesiune pentru a vedea " +
+
+        "dacă ordinea schimbă efectul.";
+
+    }
+
+
+    loop += deltaLoop;
+
+    space += deltaSpace;
+
+
+    steps.push(type);
+
+
+    status.textContent =
+      message;
+
+
+    if (loop <= 20) {
+
+      status.textContent +=
+        " Bucla este acum mult redusă; " +
+        "există mai mult spațiu pentru alternative.";
+
+    }
+
+    else if (loop >= 80) {
+
+      status.textContent +=
+        " Bucla este încă puternică; " +
+        "încearcă o combinație diferită.";
+
+    }
+
+
+    render();
+
+  }
+
+
+  document
+    .querySelectorAll("[data-action]")
+    .forEach(function (button) {
+
+      button.addEventListener(
+        "click",
+        function () {
+
+          action(
+            button.dataset.action
+          );
+
+        }
+      );
+
+    });
+
+
+  document
+    .getElementById("reset")
+    .addEventListener(
+      "click",
+      function () {
+
+        loop = 62;
+
+        space = 38;
+
+        steps = [];
+
+
+        status.textContent =
+          "Experiment resetat. " +
+          "Poți testa un alt șir de intervenții.";
+
+
+        combo.textContent =
+          "Încearcă 2–4 pași diferiți. " +
+          "Uneori efectul apare din combinație, " +
+          "nu dintr-o singură intervenție.";
+
+
+        render();
+
+      }
+    );
+
+
+  document
+    .getElementById("newSentence")
+    .addEventListener(
+      "click",
+      function () {
+
+        sentence.focus();
+
+        sentence.select();
+
+        status.textContent =
+          "Scrie o altă propoziție declanșatoare " +
+          "și testează aceeași mecanică.";
+
+      }
+    );
+
+
+  sentence.addEventListener(
+    "input",
+    render
+  );
+
+
+  speaker.addEventListener(
+    "change",
+    function () {
+
+      if (speaker.value === "authority") {
+
+        loop = 62;
+        space = 38;
+
+      }
+
+      else if (speaker.value === "peer") {
+
+        loop = 45;
+        space = 55;
+
+      }
+
+      else if (speaker.value === "group") {
+
+        loop = 58;
+        space = 42;
+
+      }
+
+      else if (speaker.value === "close") {
+
+        loop = 52;
+        space = 48;
+
+      }
+
+      else {
+
+        loop = 65;
+        space = 35;
+
+      }
+
+
+      steps = [];
+
+
+      status.textContent =
+        "Sursa evaluării a fost schimbată. " +
+        "Experimentează din nou.";
+
+
+      render();
+
+    }
+  );
+
+
+  render();
+
+})();
+
+</script>
+
+</body>
+</html>
