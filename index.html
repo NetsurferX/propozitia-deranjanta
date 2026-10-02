@@ -18,6 +18,8 @@
   --track: #edf0f2;
   --good: #2e7d5b;
   --bad: #b5533c;
+  --tense: #d9805f;
+  --calm: #3f9d7a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -32,17 +34,18 @@
     --track: #2a343a;
     --good: #5cc09a;
     --bad: #e08a74;
+    --tense: #e08a74;
+    --calm: #5cc09a;
   }
-  meta[name=theme-color] { content: #151a1e; }
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
-  padding: 20px 20px calc(28px + env(safe-area-inset-bottom, 0px));
+  padding: 16px 20px calc(20px + env(safe-area-inset-bottom, 0px));
   padding-left: calc(20px + env(safe-area-inset-left, 0px));
   padding-right: calc(20px + env(safe-area-inset-right, 0px));
   background: var(--bg);
@@ -51,31 +54,20 @@ body {
   line-height: 1.4;
 }
 
-.game { width: min(820px, 100%); margin: 0 auto; }
+.game { width: min(860px, 100%); margin: 0 auto; }
 
-h1 { margin: 0 0 6px; font-size: 26px; line-height: 1.2; }
+h1 { margin: 0 0 4px; font-size: 24px; line-height: 1.2; }
+.subtitle { color: var(--muted); margin-bottom: 10px; font-size: 15px; }
 
-.subtitle { color: var(--muted); margin-bottom: 12px; font-size: 15px; }
-
-details.help {
-  margin-bottom: 14px;
-  font-size: 14px;
-  color: var(--muted);
-}
-details.help summary {
-  cursor: pointer;
-  color: var(--accent);
-  padding: 6px 0;
-  min-height: 32px;
-}
-details.help p { margin: 6px 0 0; }
+details.help { margin-bottom: 12px; font-size: 14px; color: var(--muted); }
+details.help summary { cursor: pointer; color: var(--accent); padding: 4px 0; min-height: 30px; }
+details.help p { margin: 4px 0 0; }
 
 .panel {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 16px;
-  margin-bottom: 12px;
 }
 
 .label {
@@ -83,14 +75,10 @@ details.help p { margin: 6px 0 0; }
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: .06em;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+  display: block;
 }
-
-.setup {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 14px;
-}
+.hint { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
 
 textarea, select {
   width: 100%;
@@ -102,172 +90,190 @@ textarea, select {
   font: inherit;
   font-size: 16px; /* evită zoom-ul automat pe iOS */
 }
-textarea { resize: none; min-height: 72px; }
+textarea { resize: none; min-height: 68px; }
 textarea:focus, select:focus, button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
-.hint { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+.counter { text-align: right; font-size: 12px; color: var(--muted); margin: 2px 0 8px; }
+.field + .field { margin-top: 14px; }
+
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ---------- butoane ---------- */
+button {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+  touch-action: manipulation;
+  transition: background .15s, border-color .15s, transform .1s;
+}
+button:active { transform: scale(.97); background: var(--accent-light); border-color: var(--accent); }
+@media (hover: hover) { button:hover { border-color: var(--accent); background: var(--accent-light); } }
+button:disabled { opacity: .4; cursor: default; transform: none; }
+
 button.chip {
   min-height: 40px;
   padding: 8px 14px;
   border-radius: 20px;
-  font-size: 14px;
   text-align: center;
   background: var(--accent-light);
   border-color: transparent;
-  color: var(--text);
 }
-.counter { text-align: right; font-size: 12px; color: var(--muted); margin-top: 4px; }
-
-/* ---------- bara de stare (rămâne vizibilă la scroll) ---------- */
-.sticky {
-  position: sticky;
-  top: env(safe-area-inset-top, 0px);
-  z-index: 10;
-  margin-bottom: 12px;
-  padding: 12px 14px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: 0 4px 14px rgba(0,0,0,.08);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+button.primary {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 16px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }
+button.primary:disabled { background: var(--track); border-color: var(--border); color: var(--muted); opacity: 1; }
+@media (hover: hover) { button.primary:not(:disabled):hover { background: var(--accent); filter: brightness(1.08); } }
+button.ghost { min-height: 36px; padding: 6px 10px; font-size: 13px; border-radius: 10px; text-align: center; }
 
-.meter-head {
+/* ---------- ecranul de joc ---------- */
+.topbar {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 6px;
-  font-size: 14px;
-  margin-bottom: 6px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
 }
-.meter-head .num { font-weight: 700; font-variant-numeric: tabular-nums; }
-.delta {
-  font-size: 12px;
+.topbar .who { flex: 1; min-width: 0; }
+.topbar .q {
   font-weight: 700;
-  opacity: 0;
-  margin-left: 4px;
-  transition: opacity .3s;
+  font-size: 15px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.topbar .s { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.visual {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  transition: background .7s;
+}
+.stage { position: relative; width: 120px; height: 120px; flex: none; }
+.ring {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: var(--tense);
+  transition: opacity .6s;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(.93); } }
+.calm-wrap { position: absolute; inset: 0; display: grid; place-items: center; }
+.calm {
+  width: 40%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: var(--calm);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, .35);
+  transition: width .6s cubic-bezier(.3, 1.3, .5, 1);
+}
+.calm.pop { animation: pop .5s ease; }
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
+
+.legend { flex: 1; min-width: 0; }
+.state-word { font-size: 18px; font-weight: 700; line-height: 1.2; margin-bottom: 8px; color: var(--text); }
+.leg-row { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-top: 5px; color: var(--text); }
+.dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.dot.t { background: var(--tense); }
+.dot.c { background: var(--calm); }
+.leg-row .num { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+.delta {
+  display: inline-block; min-width: 30px; text-align: right;
+  font-size: 13px; font-weight: 700; opacity: 0; transition: opacity .3s;
 }
 .delta.show { opacity: 1; }
 .delta.up { color: var(--good); }
 .delta.down { color: var(--bad); }
 
-.bar { height: 12px; border-radius: 20px; background: var(--track); overflow: hidden; }
-.fill { height: 100%; width: 50%; background: var(--accent); border-radius: 20px; transition: width .4s ease; }
-.fill.space { opacity: .55; }
-
-/* ---------- cele 3 stadii ---------- */
-.state {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 12px;
-}
-.state-box {
-  border: 1px solid var(--border);
+.thoughts {
+  margin-top: 10px;
+  padding: 10px 12px;
   border-radius: 12px;
-  padding: 12px 14px;
   background: var(--panel);
-  opacity: .65;
-  transition: background .2s, border-color .2s, opacity .2s;
+  border: 1px solid var(--border);
+  font-size: 14px;
 }
-.state-box.active { border-color: var(--accent); background: var(--accent-light); opacity: 1; }
-.state-title { font-size: 12px; color: var(--muted); margin-bottom: 6px; letter-spacing: .04em; }
-.state-text { font-size: 15px; line-height: 1.35; overflow-wrap: anywhere; }
+.thoughts div + div { margin-top: 4px; }
+.thoughts .tl { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; margin-right: 4px; }
 
-/* ---------- feedback ---------- */
 .status {
+  margin-top: 10px;
+  min-height: 54px;
   background: var(--accent-light);
   border-left: 4px solid var(--accent);
   border-radius: 10px;
-  padding: 12px 14px;
+  padding: 9px 12px;
   font-size: 15px;
-  margin-bottom: 12px;
 }
+.status.combo { border-left-color: var(--good); }
 
-/* ---------- acțiuni ---------- */
-.actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.dec-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 12px 0 8px; }
+.dec-head .label { margin: 0; }
+.dec-head .tools { display: flex; gap: 6px; }
 
-button {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 14px;
-  background: var(--panel);
-  color: var(--text);
-  font: inherit;
-  font-size: 15px;
-  cursor: pointer;
-  min-height: 64px;
-  text-align: left;
-  touch-action: manipulation;
-  transition: background .15s, border-color .15s, transform .1s;
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.actions button { min-height: 70px; padding: 9px 11px; }
+.actions b { display: block; font-weight: 600; font-size: 14px; line-height: 1.25; }
+.actions small { display: block; color: var(--muted); margin-top: 3px; font-size: 12.5px; line-height: 1.25; }
+
+.path {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 12px; padding: 2px 0 4px;
+  overflow-x: auto; white-space: nowrap;
+  scrollbar-width: none;
 }
-button b { display: block; font-weight: 600; }
-button small { display: block; color: var(--muted); margin-top: 4px; font-size: 13px; line-height: 1.3; }
-button:active { transform: scale(.98); background: var(--accent-light); border-color: var(--accent); }
-@media (hover: hover) {
-  button:hover { border-color: var(--accent); background: var(--accent-light); }
-}
-button:disabled { opacity: .45; cursor: default; }
-
-/* ---------- istoric ---------- */
-.path { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; min-height: 36px; }
+.path::-webkit-scrollbar { display: none; }
+.path > * { flex: none; }
+.path-label { font-size: 13px; color: var(--muted); }
 .node {
-  padding: 7px 10px;
-  border-radius: 8px;
-  background: var(--track);
-  border: 1px solid var(--border);
-  font-size: 13px;
+  padding: 6px 10px; border-radius: 8px; font-size: 13px;
+  background: var(--track); border: 1px solid var(--border);
 }
 .arrow { color: var(--muted); }
 
-.combo {
-  margin-top: 12px;
-  padding: 12px 14px;
-  background: var(--accent-light);
-  border-radius: 10px;
-  font-size: 14px;
+/* ---------- tabletă / desktop: două coloane, fără scroll ---------- */
+@media (min-width: 760px) {
+  .play { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+  .dec-head { margin-top: 0; }
+  .stage { width: 140px; height: 140px; }
 }
 
-.bottom { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
-.bottom button { min-height: 48px; text-align: center; font-size: 14px; }
-
 /* ---------- telefon ---------- */
-@media (max-width: 700px) {
+@media (max-width: 430px) {
   body {
-    padding-top: 14px;
+    padding-top: 12px;
     padding-left: calc(12px + env(safe-area-inset-left, 0px));
     padding-right: calc(12px + env(safe-area-inset-right, 0px));
   }
-  h1 { font-size: 22px; }
-  .setup { grid-template-columns: 1fr; gap: 12px; }
+  h1 { font-size: 21px; }
   .panel { padding: 14px; border-radius: 14px; }
-  .sticky { padding: 10px 12px; gap: 12px; border-radius: 14px; }
-
-  /* stadii compacte: doar cel activ afișează textul */
-  .state { grid-template-columns: 1fr; gap: 6px; }
-  .state-box { padding: 9px 12px; }
-  .state-box:not(.active) .state-text { display: none; }
-  .state-box:not(.active) .state-title { margin-bottom: 0; }
-  .state-box.active .state-text { font-size: 16px; }
-
-  .actions { grid-template-columns: 1fr 1fr; }
-  .bottom { grid-template-columns: 1fr 1fr; }
-  .bottom #reset { grid-column: 1 / -1; order: 3; }
-}
-
-@media (max-width: 430px) {
-  .actions { grid-template-columns: 1fr; }
-  button { min-height: 60px; }
+  .stage { width: 112px; height: 112px; }
+  .visual { gap: 14px; padding: 12px; }
+  .state-word { font-size: 17px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; }
+  * { transition: none !important; animation: none !important; }
 }
 </style>
 </head>
@@ -275,113 +281,113 @@ button:disabled { opacity: .45; cursor: default; }
 <body>
 <div class="game">
 
-  <h1>Cum ieși din cercul gândurilor</h1>
-  <div class="subtitle">
-    Alege pe rând câte un pas mic și vezi ce se schimbă.
+  <!-- ===== ECRAN 1: pregătire ===== -->
+  <div id="setup">
+    <h1>Cum ieși din cercul gândurilor</h1>
+    <div class="subtitle">Vezi ce se schimbă când iei decizii mici în fața unei propoziții care te-a deranjat.</div>
+
+    <details class="help">
+      <summary>Cum funcționează?</summary>
+      <p>
+        <strong>Gânduri în cerc</strong> arată cât te trage propoziția în același gând, care se tot repetă.
+        <strong>Spațiu de decizie</strong> arată cât loc ai să alegi calm cum reacționezi.
+        Ia 2–4 decizii și urmărește cercul. Contează și ordinea.
+      </p>
+    </details>
+
+    <section class="panel">
+      <div class="field">
+        <label class="label" for="sentence">1. Scrie propoziția care te-a deranjat</label>
+        <div class="hint">O frază auzită de la cineva sau pe care ți-ai spus-o singur. Scrie-o cu cuvintele tale.</div>
+        <textarea id="sentence" maxlength="140" rows="2"
+          placeholder="Scrie aici, de exemplu: Iar ai greșit."></textarea>
+        <div class="counter"><span id="count">0</span>/140</div>
+        <div class="hint" style="margin-bottom:6px">Sau atinge un exemplu:</div>
+        <div class="chips">
+          <button type="button" class="chip" data-text="Și tu te gruzești?">Și tu te gruzești?</button>
+          <button type="button" class="chip" data-text="Puteai mai bine.">Puteai mai bine.</button>
+          <button type="button" class="chip" data-text="Iar ai greșit.">Iar ai greșit.</button>
+          <button type="button" class="chip" data-text="Nu ești făcut pentru asta.">Nu ești făcut pentru asta.</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="speaker">2. Cine a spus-o?</label>
+        <select id="speaker">
+          <option value="peer">coleg / egal</option>
+          <option value="authority" selected>persoană cu autoritate</option>
+          <option value="group">grupul</option>
+          <option value="close">persoană apropiată</option>
+          <option value="self">eu însumi</option>
+        </select>
+      </div>
+
+      <button id="start" class="primary" disabled>Începe →</button>
+    </section>
   </div>
 
-  <details class="help">
-    <summary>Cum funcționează?</summary>
-    <p>
-      <strong>Gânduri în cerc</strong> arată cât te trage propoziția în același gând, care se tot repetă.
-      <strong>Alte variante</strong> arată cât loc ai pentru alte gânduri și reacții.
-      Alege 2–4 pași și urmărește barele. Contează și ordinea.
-    </p>
-  </details>
+  <!-- ===== ECRAN 2: decizii ===== -->
+  <div id="play" hidden>
 
-  <section class="panel setup">
-    <div>
-      <label class="label" for="sentence">1. Scrie propoziția care te-a deranjat</label>
-      <div class="hint">O frază auzită de la cineva sau pe care ți-ai spus-o singur și care ți-a rămas în minte. Scrie-o cu cuvintele tale.</div>
-      <textarea id="sentence" maxlength="140" rows="2"
-        placeholder="Scrie aici, de exemplu: Iar ai greșit."></textarea>
-      <div class="counter"><span id="count">0</span>/140</div>
-      <div class="hint" style="margin:8px 0 6px">Sau atinge un exemplu:</div>
-      <div class="chips">
-        <button type="button" class="chip" data-text="Și tu te gruzești?">Și tu te gruzești?</button>
-        <button type="button" class="chip" data-text="Puteai mai bine.">Puteai mai bine.</button>
-        <button type="button" class="chip" data-text="Iar ai greșit.">Iar ai greșit.</button>
-        <button type="button" class="chip" data-text="Nu ești făcut pentru asta.">Nu ești făcut pentru asta.</button>
+    <div class="topbar">
+      <div class="who">
+        <div class="q" id="quote"></div>
+        <div class="s" id="whoLine"></div>
       </div>
+      <button id="back" class="ghost" type="button">Schimbă</button>
     </div>
-    <div>
-      <label class="label" for="speaker">2. Cine a spus-o?</label>
-      <div class="hint">Contează cine o spune: schimbă cât de tare te atinge.</div>
-      <select id="speaker">
-        <option value="peer">coleg / egal</option>
-        <option value="authority" selected>persoană cu autoritate</option>
-        <option value="group">grupul</option>
-        <option value="close">persoană apropiată</option>
-        <option value="self">eu însumi</option>
-      </select>
-    </div>
-  </section>
 
-  <!-- rămâne fixată sus când derulezi -->
-  <div class="sticky" aria-label="Cum stai acum">
-    <div>
-      <div class="meter-head">
-        <span>Gânduri în cerc</span>
-        <span><span class="num" id="loopValue">62</span><span class="delta" id="loopDelta"></span></span>
+    <div class="play">
+      <div class="play-left">
+        <div class="visual" id="visual">
+          <div class="stage" id="stage" role="img">
+            <div class="ring" id="ring"></div>
+            <div class="calm-wrap"><div class="calm" id="calm"></div></div>
+          </div>
+          <div class="legend">
+            <div class="state-word" id="stateWord"></div>
+            <div class="leg-row">
+              <span class="dot t"></span><span>Gânduri în cerc</span>
+              <span class="num" id="loopValue">62</span><span class="delta" id="loopDelta"></span>
+            </div>
+            <div class="leg-row">
+              <span class="dot c"></span><span>Spațiu de decizie</span>
+              <span class="num" id="spaceValue">38</span><span class="delta" id="spaceDelta"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="thoughts">
+          <div><span class="tl">Ce îți spui</span><span id="interpret"></span></div>
+          <div><span class="tl">Ce crezi despre tine</span><span id="selfEval"></span></div>
+        </div>
+
+        <div id="status" class="status" aria-live="polite"></div>
       </div>
-      <div class="bar" role="progressbar" id="loopBar" aria-label="Gânduri în cerc" aria-valuemin="0" aria-valuemax="100">
-        <div id="loopFill" class="fill"></div>
+
+      <div class="play-right">
+        <div class="dec-head">
+          <span class="label">Ce decizi acum?</span>
+          <span class="tools">
+            <button id="undo" class="ghost" type="button">↶ Anulează</button>
+            <button id="reset" class="ghost" type="button">↻ De la capăt</button>
+          </span>
+        </div>
+
+        <div class="actions">
+          <button data-action="distance"><b>Decid că e doar o părere</b><small>„Nu e cine sunt eu.”</small></button>
+          <button data-action="context"><b>Decid să văd ce s-a întâmplat</b><small>„Ce s-a văzut concret?”</small></button>
+          <button data-action="hypothesis"><b>Decid să nu o iau de bună</b><small>„Poate e adevărat, poate nu.”</small></button>
+          <button data-action="perspective"><b>Decid să mă uit și altfel</b><small>„Cum ar vedea altcineva?”</small></button>
+          <button data-action="pause"><b>Decid să nu răspund pe loc</b><small>„Mai întâi respir.”</small></button>
+          <button data-action="action"><b>Decid să fac ceva concret</b><small>„Un pas mic, vizibil.”</small></button>
+        </div>
+
+        <div id="path" class="path"></div>
       </div>
     </div>
-    <div>
-      <div class="meter-head">
-        <span>Alte variante</span>
-        <span><span class="num" id="spaceValue">38</span><span class="delta" id="spaceDelta"></span></span>
-      </div>
-      <div class="bar" role="progressbar" id="spaceBar" aria-label="Alte variante" aria-valuemin="0" aria-valuemax="100">
-        <div id="spaceFill" class="fill space"></div>
-      </div>
-    </div>
+
   </div>
-
-  <div class="state">
-    <div id="boxSentence" class="state-box active">
-      <div class="state-title">1 · CE S-A SPUS</div>
-      <div id="sentenceView" class="state-text"></div>
-    </div>
-    <div id="boxInterpret" class="state-box">
-      <div class="state-title">2 · CE ÎȚI SPUI</div>
-      <div id="interpret" class="state-text"></div>
-    </div>
-    <div id="boxSelf" class="state-box">
-      <div class="state-title">3 · CE CREZI DESPRE TINE</div>
-      <div id="selfEval" class="state-text"></div>
-    </div>
-  </div>
-
-  <div id="status" class="status" aria-live="polite">
-    Începe de sus: scrie propoziția care te-a deranjat (sau alege un exemplu), apoi alege un pas.
-  </div>
-
-  <section class="panel">
-    <div class="label">Alege următorul pas</div>
-    <div class="actions">
-      <button data-action="distance"><b>O despart de mine</b><small>„E o părere, nu cine sunt eu.”</small></button>
-      <button data-action="context"><b>Văd ce s-a întâmplat</b><small>„Ce s-a văzut concret?”</small></button>
-      <button data-action="hypothesis"><b>Nu o iau de bună</b><small>„Poate e adevărat, poate nu.”</small></button>
-      <button data-action="perspective"><b>Mă uit și altfel</b><small>„Cum ar vedea altcineva?”</small></button>
-      <button data-action="pause"><b>Fac o pauză</b><small>Nu răspund imediat.</small></button>
-      <button data-action="action"><b>Fac ceva concret</b><small>Un pas mic, vizibil.</small></button>
-    </div>
-  </section>
-
-  <section class="panel">
-    <div class="label">Pașii tăi</div>
-    <div id="path" class="path"></div>
-
-    <div id="combo" class="combo"></div>
-
-    <div class="bottom">
-      <button id="undo">↶ Anulează ultimul pas</button>
-      <button id="newSentence">Schimbă propoziția</button>
-      <button id="reset">↻ De la capăt</button>
-    </div>
-  </section>
 
 </div>
 
@@ -390,7 +396,7 @@ button:disabled { opacity: .45; cursor: default; }
   var $ = function (id) { return document.getElementById(id); };
 
   var sentence = $("sentence"), speaker = $("speaker");
-  var status = $("status"), combo = $("combo"), path = $("path");
+  var status = $("status");
 
   var START = {
     authority: [62, 38], peer: [45, 55], group: [58, 42],
@@ -398,8 +404,8 @@ button:disabled { opacity: .45; cursor: default; }
   };
 
   var LABELS = {
-    distance: "la distanță", context: "ce s-a întâmplat", hypothesis: "poate da, poate nu",
-    perspective: "alt punct de vedere", pause: "pauză", action: "pas concret"
+    distance: "e o părere", context: "ce s-a întâmplat", hypothesis: "nu o iau de bună",
+    perspective: "mă uit altfel", pause: "pauză", action: "ceva concret"
   };
 
   var EFFECTS = {
@@ -407,43 +413,36 @@ button:disabled { opacity: .45; cursor: default; }
     context:    [-7, 7,   "Te uiți la ce s-a întâmplat, nu la verdict."],
     hypothesis: [-9, 9,   "Nu mai e o sentință, ci ceva ce poți verifica."],
     perspective:[-8, 10,  "Ai găsit o altă explicație posibilă."],
-    pause:      [-5, 6,   "Nu ai reacționat pe loc."],
+    pause:      [-5, 6,   "Nu ai reacționat pe loc. Ai câștigat timp."],
     action:     [-4, 8,   "Ai trecut de la gânduri la fapte."]
   };
 
-  // perechi (pas anterior → pas curent) care dau un efect suplimentar
+  // perechi (decizia anterioară → decizia curentă) care ajută mai mult împreună
   var COMBOS = [
     ["distance", "context"], ["context", "hypothesis"], ["pause", "action"],
     ["hypothesis", "action"], ["distance", "pause"], ["perspective", "distance"]
   ];
 
-  var COMBO_HINT = "Încearcă 2–4 pași. Uneori contează ordinea, nu doar pașii.";
-
   var steps = [];
   var loop = 62, space = 38;
-  var lastDelta = null;      // {loop, space} pentru ultimul pas
-  var lastMessage = "";
-  var lastWasCombo = false;
+  var lastDelta = null, lastMessage = "", lastWasCombo = false;
 
   function clamp(v) { return Math.max(0, Math.min(100, Math.round(v))); }
-
   function isCombo(prev, cur) {
     return COMBOS.some(function (c) { return c[0] === prev && c[1] === cur; });
   }
 
-  // recalculează totul din pașii făcuți (permite „Anulează”)
+  // recalculează totul din deciziile luate (permite „Anulează”)
   function compute() {
     var s = START[speaker.value] || START.authority;
     loop = s[0]; space = s[1];
     lastDelta = null; lastMessage = ""; lastWasCombo = false;
 
     steps.forEach(function (type, i) {
-      var e = EFFECTS[type];
-      var dl = e[0], ds = e[1];
+      var e = EFFECTS[type], dl = e[0], ds = e[1];
       var prev = steps[i - 1];
       var c = prev && isCombo(prev, type);
       if (c) { dl -= 9; ds += 9; }
-
       var nl = clamp(loop + dl), ns = clamp(space + ds);
       lastDelta = { loop: nl - loop, space: ns - space };
       loop = nl; space = ns;
@@ -457,133 +456,154 @@ button:disabled { opacity: .45; cursor: default; }
     el.textContent = (value > 0 ? "+" : "−") + Math.abs(value);
     el.className = "delta show " + (value > 0 ? "up" : "down");
     clearTimeout(el._t);
-    el._t = setTimeout(function () { el.classList.remove("show"); }, 1800);
+    el._t = setTimeout(function () { el.classList.remove("show"); }, 2200);
+  }
+
+  function setStatus(text, isCombo) {
+    status.textContent = text;
+    status.classList.toggle("combo", !!isCombo);
+  }
+
+  function isDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
   }
 
   function render(showDelta) {
-    $("loopFill").style.width = loop + "%";
-    $("spaceFill").style.width = space + "%";
     $("loopValue").textContent = loop;
     $("spaceValue").textContent = space;
-    $("loopBar").setAttribute("aria-valuenow", loop);
-    $("spaceBar").setAttribute("aria-valuenow", space);
+
+    // cercul: tensiunea (roșu) pulsează mai repede și e mai intensă când bucla e mare;
+    // spațiul de decizie (verde) crește în mijloc
+    $("ring").style.opacity = (0.25 + loop / 100 * 0.75).toFixed(2);
+    $("ring").style.animationDuration = (3.4 - loop * 0.022).toFixed(2) + "s";
+    $("calm").style.width = (12 + space * 0.78).toFixed(1) + "%";
+    $("stage").setAttribute("aria-label",
+      "Gânduri în cerc " + loop + ", spațiu de decizie " + space);
+
+    // culoarea fundalului trece de la cald la verde pe măsură ce crește spațiul
+    var hue = space < 50 ? 15 + space * 0.5 : 40 + (space - 50) * 2.2;
+    $("visual").style.background = isDark()
+      ? "hsl(" + hue + " 28% 18%)"
+      : "hsl(" + hue + " 60% 92%)";
 
     if (showDelta && lastDelta) {
       flashDelta($("loopDelta"), lastDelta.loop);
       flashDelta($("spaceDelta"), lastDelta.space);
+      var calm = $("calm");
+      calm.classList.remove("pop"); void calm.offsetWidth; calm.classList.add("pop");
     } else {
       $("loopDelta").classList.remove("show");
       $("spaceDelta").classList.remove("show");
     }
 
-    var text = sentence.value.trim();
-    $("sentenceView").textContent = text ? "„" + text + "”" : "Aici apare propoziția ta.";
-    $("count").textContent = sentence.value.length;
-
-    var stage;
     if (loop > 70) {
+      $("stateWord").textContent = "Ești prins în gânduri";
       $("interpret").textContent = "„Parcă așa sunt eu, de fapt.”";
       $("selfEval").textContent = "„Dacă are dreptate?”";
-      stage = "boxSelf";
     } else if (loop > 40) {
+      $("stateWord").textContent = "Începi să ai loc";
       $("interpret").textContent = "„Poate că spune ceva important.”";
       $("selfEval").textContent = "„Trebuie să văd ce înseamnă.”";
-      stage = "boxInterpret";
     } else {
+      $("stateWord").textContent = "Ai loc să decizi";
       $("interpret").textContent = "„E doar o părere despre o situație.”";
       $("selfEval").textContent = "„Pot alege ce fac mai departe.”";
-      stage = "boxSentence";
     }
-    ["boxSentence", "boxInterpret", "boxSelf"].forEach(function (id) {
-      $(id).classList.toggle("active", id === stage);
-    });
 
-    // șirul parcurs
+    // deciziile luate
+    var path = $("path");
     path.textContent = "";
-    function node(txt, cls) {
+    function add(txt, cls) {
       var s = document.createElement("span");
       s.className = cls; s.textContent = txt; path.appendChild(s);
     }
-    node("început", "node");
-    steps.forEach(function (st) { node("→", "arrow"); node(LABELS[st], "node"); });
+    add("Deciziile tale:", "path-label");
+    if (!steps.length) add("încă niciuna", "node");
+    steps.forEach(function (st, i) {
+      if (i) add("→", "arrow");
+      add((i + 1) + ". " + LABELS[st], "node");
+    });
+    path.scrollLeft = path.scrollWidth;
 
     $("undo").disabled = steps.length === 0;
     $("reset").disabled = steps.length === 0;
   }
 
-  function act(type) {
+  function decide(type) {
     var prev = steps[steps.length - 1];
     steps.push(type);
     compute();
 
     var msg = lastMessage;
-    if (loop <= 20) {
-      msg += " Gândurile în cerc s-au liniștit mult; ai mai multe variante.";
-    } else if (loop >= 80) {
-      msg += " Încă te trage tare; încearcă alți pași.";
-    }
-    status.textContent = msg;
+    if (loop <= 20) msg += " Ai destul loc să decizi calm.";
+    else if (loop >= 80) msg += " Încă te trage tare; încearcă alte decizii.";
 
-    combo.textContent = lastWasCombo
-      ? "Combinație bună: " + LABELS[prev] + " → " + LABELS[type] +
-        ". În această ordine, pașii ajută mai mult."
-      : "Pas notat. Încearcă altă ordine, să vezi dacă se schimbă ceva.";
+    if (lastWasCombo) {
+      setStatus("✓ Combinație bună: " + LABELS[prev] + " → " + LABELS[type] + ". " + msg, true);
+    } else {
+      setStatus(msg, false);
+    }
 
     if (navigator.vibrate) { try { navigator.vibrate(10); } catch (e) {} }
     render(true);
   }
 
   document.querySelectorAll("[data-action]").forEach(function (b) {
-    b.addEventListener("click", function () { act(b.dataset.action); });
+    b.addEventListener("click", function () { decide(b.dataset.action); });
   });
 
   $("undo").addEventListener("click", function () {
     if (!steps.length) return;
     steps.pop();
     compute();
-    status.textContent = steps.length
-      ? "Ultimul pas a fost anulat. Alege altul."
-      : "Ești din nou la început. Alege primul pas.";
-    combo.textContent = COMBO_HINT;
+    setStatus(steps.length
+      ? "Ultima decizie a fost anulată. Alege alta."
+      : "Ești din nou la început. Alege prima decizie.", false);
     render(false);
   });
 
   $("reset").addEventListener("click", function () {
     steps = [];
     compute();
-    status.textContent = "Ai luat-o de la capăt. Încearcă alți pași.";
-    combo.textContent = COMBO_HINT;
+    setStatus("Ai luat-o de la capăt. Încearcă alte decizii.", false);
     render(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
-  $("newSentence").addEventListener("click", function () {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    setTimeout(function () { sentence.focus(); sentence.select(); }, 250);
-    status.textContent = "Scrie altă propoziție și încearcă din nou.";
-  });
-
-  sentence.addEventListener("input", function () { render(false); });
+  // ----- ecranul 1 -----
+  function updateSetup() {
+    $("count").textContent = sentence.value.length;
+    $("start").disabled = !sentence.value.trim();
+  }
+  sentence.addEventListener("input", updateSetup);
 
   document.querySelectorAll(".chip").forEach(function (c) {
     c.addEventListener("click", function () {
       sentence.value = c.dataset.text;
-      status.textContent = "Bine. Alege cine a spus-o, apoi primul pas de mai jos.";
-      render(false);
+      updateSetup();
     });
   });
 
-  speaker.addEventListener("change", function () {
+  $("start").addEventListener("click", function () {
+    var text = sentence.value.trim();
+    if (!text) return;
     steps = [];
     compute();
-    status.textContent = "Ai schimbat cine o spune. Încearcă din nou.";
-    combo.textContent = COMBO_HINT;
+    $("quote").textContent = "„" + text + "”";
+    $("whoLine").textContent = "Cine a spus-o: " + speaker.options[speaker.selectedIndex].text;
+    $("setup").hidden = true;
+    $("play").hidden = false;
+    setStatus("Alege prima decizie de mai jos. Contează și ordinea.", false);
     render(false);
+    window.scrollTo(0, 0);
   });
 
-  combo.textContent = COMBO_HINT;
-  compute();
-  render(false);
+  $("back").addEventListener("click", function () {
+    $("play").hidden = true;
+    $("setup").hidden = false;
+    window.scrollTo(0, 0);
+  });
+
+  updateSetup();
 })();
 </script>
 </body>
